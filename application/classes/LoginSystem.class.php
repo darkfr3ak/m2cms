@@ -42,7 +42,7 @@ class LoginSystem {
         "/m2/register.php", "/m2/reset.php"
     );    // Pages that doesn't require logging in (exclude login page) (but include register page if you want)
      
-    private $loginPage          = "/m2/login.php"; // The login page. ex : /login.php or /accounts/login.php
+    private $loginPage          = "/m2/index.php"; // The login page. ex : /login.php or /accounts/login.php
     private $homePage           = "/m2/home.php";    // The home page. The main page for logged in users. Redirects to here when logs in
     
     /* End Extra Settings */

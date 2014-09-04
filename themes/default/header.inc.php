@@ -5,8 +5,8 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="themes/default/css/bootstrap.min.css" rel="stylesheet" media="screen">
-        <link href="themes/default/css/font-awesome.min.css" rel="stylesheet" media="screen">
+        <link href="themes/<?php echo THEME ?>/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="themes/<?php echo THEME ?>/css/font-awesome.min.css" rel="stylesheet" media="screen">
         <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
         <style type="text/css">
         body {
@@ -115,6 +115,7 @@
 
         }
         ?>
+          <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link"><?php echo $LS->getUser("user_name"); ?></a></p>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container -->

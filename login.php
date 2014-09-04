@@ -1,5 +1,6 @@
 <?php
-    include 'themes/default/header.inc.php';
+    //include 'themes/default/header.inc.php';
+    require_once "application/bootstrap.php";
     if(isset(HTTP::$POST['act_login'])){
         $user=HTTP::$POST['login'];
         $pass=HTTP::$POST['pass'];
@@ -11,8 +12,10 @@
             }
         }
     }
+    if(!$LS->loggedIn){
 ?>
 <button class="btn btn-primary btn-lg" href="#signup" data-toggle="modal" data-target=".bs-modal-sm">Sign In/Register</button>
+    <?php } ?>
 <!-- Modal -->
 <div class="modal fade bs-modal-sm" id="myModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-sm">

@@ -1,10 +1,9 @@
 <?php
-    include 'themes/default/header.inc.php';
+    include_once 'themes/default/header.inc.php';
 ?>
-        <div class="container">
-            <p>The Index Page</p>
-            <a href="login.php">Login</a>
-        </div>
+        
+            <?php include 'login.php'; ?>
+            <h3>Hallo Ihr da!</h3>
 <?php
-    include 'themes/default/footer.inc.php';
+    include_once 'themes/default/footer.inc.php';
 ?>

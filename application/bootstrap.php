@@ -27,7 +27,8 @@ header("Content-type:text/html; charset=utf-8");
 error_reporting(E_ALL ^ E_NOTICE);
 
 define("DS", DIRECTORY_SEPARATOR);
-define("SITE_ROOT", dirname(dirname(__FILE__)).DS);
+define("SITE_ROOT", str_replace($DOCUMENT_ROOT, "", dirname($PHP_SELF)));
+define("THEME", "default");
 
 // checking for minimum PHP version
 if (version_compare(PHP_VERSION, '5.3.7', '<')) {
