@@ -86,4 +86,3 @@ HTTP::init();
 
 $LS = new LoginSystem();
 $LS->site_root = SITE_ROOT;
-$LS->init();

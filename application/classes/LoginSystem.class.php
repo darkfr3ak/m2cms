@@ -42,7 +42,7 @@ class LoginSystem {
         "/m2/register.php", "/m2/reset.php"
     );    // Pages that doesn't require logging in (exclude login page) (but include register page if you want)
      
-    private $loginPage          = "/m2/index.php"; // The login page. ex : /login.php or /accounts/login.php
+    private $loginPage          = "/m2/login.php"; // The login page. ex : /login.php or /accounts/login.php
     private $homePage           = "/m2/home.php";    // The home page. The main page for logged in users. Redirects to here when logs in
     
     /* End Extra Settings */
@@ -124,10 +124,10 @@ class LoginSystem {
                 return false;
             }else{
                 /* Get the user details */
-                $rows            = $sql->fetch(PDO::FETCH_ASSOC);
-                $us_id        = $rows['user_id'];
-                $us_pass     = $rows['password'];
-                $us_salt     = $rows['password_salt'];
+                $rows       = $sql->fetch(PDO::FETCH_ASSOC);
+                $us_id      = $rows['user_id'];
+                $us_pass    = $rows['password'];
+                $us_salt    = $rows['password_salt'];
                 $saltedPass = hash('sha256', "{$password}{$this->passwordSalt}{$us_salt}");
                 
                 if($saltedPass == $us_pass){
@@ -136,7 +136,7 @@ class LoginSystem {
                         $_SESSION['logSyscuruser'] = $us_id;
                         setcookie("logSyslogin", hash("sha256", $this->secureKey.$us_id.$this->secureKey), time()+3600*99*500, "/");
                         
-                        if( isset($_POST['remember_me']) && $this->rememberMe === true ){
+                        if( isset(HTTP::$POST['remember_me']) && $this->rememberMe === true ){
                             setcookie("logSysrememberMe", $us_id, time()+3600*99*500, "/");
                         }
                         $this->loggedIn = true;
@@ -207,27 +207,30 @@ class LoginSystem {
         $curStatus = "initial";    // The Current Status of Forgot Password process
         $identName = $this->emailLogin === false ? "Username" : "Username / E-Mail";
         
-        if( !isset($_POST['logSysforgotPass']) && !isset($_GET['resetPassToken']) && !isset($_POST['logSysforgotPassRePass']) ){
-            $html='<form action="'.$_SERVER['PHP_SELF'].'" method="POST">';
-                $html.="<label>$identName<br/><input type='text' id='loginSysIdentification' placeholder='Which one do you remember ?' size='25' name='identification'/></label>";
-                $html.="<br/><button name='logSysforgotPass' type='submit'>Reset Password</button>";
+        if( !isset(HTTP::$POST['logSysforgotPass']) && !isset(HTTP::$GET['resetPassToken']) && !isset(HTTP::$POST['logSysforgotPassRePass']) ){
+            $html='<form action="'.$_SERVER['PHP_SELF'].'" method="POST" class="form-horizontal">';
+                $html.="<label for='loginSysIdentification'>$identName</label><div class='input-group' style='margin-bottom: 15px'>
+                                <span class='input-group-addon'>
+                                    <i class='glyphicon glyphicon-user'></i> / @
+                                </span><input type='text' class='form-control' id='loginSysIdentification' placeholder='Which one do you remember ?' name='identification'/></div>";
+                $html.="<button class='btn btn-primary btn-block' name='logSysforgotPass' type='submit'>Reset Password</button>";
             $html.="</form>";
             echo $html;
             $curStatus = "resetPasswordForm"; // The user had moved to the reset password form ie she/he is currently seeing the forgot password form.
             
-        }elseif( isset($_GET['resetPassToken']) && !isset($_POST['logSysforgotPassRePass']) ){
+        }elseif( isset(HTTP::$GET['resetPassToken']) && !isset(HTTP::$POST['logSysforgotPassRePass']) ){
             /* The user gave the password reset token. Check if the token is valid. */
             $sql = $this->dbh->prepare("SELECT `uid` FROM `resetTokens` WHERE `token` = ?");
-            $sql->execute(array($_GET['resetPassToken']));
+            $sql->execute(array(HTTP::$GET['resetPassToken']));
             
-            if( $sql->rowCount() == 0 || $_GET['resetPassToken'] == "" ){
+            if( $sql->rowCount() == 0 || HTTP::$GET['resetPassToken'] == "" ){
                 echo "<h3>Error : Wrong/Invalid Token</h3>";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             }else{
                 /* The token is valid, display the new password form */
                 $html  = "<p>The Token key was Authorized. Now, you can change the password</p>";
                 $html .= "<form action='{$_SERVER['PHP_SELF']}' method='POST'>";
-                    $html    .=    "<input type='hidden' name='token' value='{$_GET['resetPassToken']}'/>";
+                    $html    .=    "<input type='hidden' name='token' value='".HTTP::$GET['resetPassToken']."'/>";
                     $html    .=    "<label>New Password<br/><input type='password' name='password'/></label><br/>";
                     $html    .=    "<label>Retype Password<br/><input type='password' name='password2'/></label><br/>";
                     $html    .=    "<button name='logSysforgotPassRePass'>Reset Password</button>";
@@ -235,21 +238,21 @@ class LoginSystem {
                 echo $html;
                 $curStatus = "changePasswordForm"; // The token was correct, displayed the change/new password form.
             }
-        }elseif( isset($_POST['logSysforgotPassRePass']) ){
+        }elseif( isset(HTTP::$POST['logSysforgotPassRePass']) ){
             
             $sql = $this->dbh->prepare("SELECT `uid` FROM `resetTokens` WHERE `token` = ?");
-            $sql->execute(array($_POST['token']));
+            $sql->execute(array(HTTP::$POST['token']));
             
-            if( $sql->rowCount()==0 || $_POST['token']=="" ){
+            if( $sql->rowCount()==0 || HTTP::$POST['token']=="" ){
                 echo "<h3>Error : Wrong/Invalid Token</h3>";
                 $curStatus = "invalidToken"; // The token user gave was not valid
             }else{
-                if( $_POST['password'] != $_POST['password2'] || $_POST['password']=="" || $_POST['password2']=="" ){
+                if( HTTP::$POST['password'] != HTTP::$POST['password2'] || HTTP::$POST['password']=="" || HTTP::$POST['password2']=="" ){
                     echo "<h3>Error : Passwords Don't Match Or Passwords Left Blank</h3>";
                     $curStatus = "passwordDontMatch"; // The new password and retype password submitted didn't match
                 }else{
                     
-                    $_POST['newPassword'] = $_POST['password2'];
+                    HTTP::$POST['newPassword'] = HTTP::$POST['password2'];
                     $this->user                 = $sql->fetchColumn();
                     $this->loggedIn         = true; // We must create a fake assumption that the user is logged in to change the password as $LS->changePassword() requires the user to be logged in.
                     
@@ -257,7 +260,7 @@ class LoginSystem {
                         $this->user         = false;
                         $this->loggedIn = false;
                         $sql                 =    $this->dbh->prepare("DELETE FROM resetTokens WHERE token=?");
-                        $sql->execute(array($_POST['token']));
+                        $sql->execute(array(HTTP::$POST['token']));
                         echo "<h3>Success : Password Reset Successful</h3><p>You may now login with your new password.</p>";
                         $curStatus = "passwordChanged"; // The password was successfully changed
                     }
@@ -265,7 +268,7 @@ class LoginSystem {
             }
         }else{
             /* Check if username/email is provided and if it's valid and exists */
-            $identification = isset($_POST['identification']) ? $_POST['identification']:"";
+            $identification = isset(HTTP::$POST['identification']) ? HTTP::$POST['identification']:"";
             if($identification == ""){
                 echo "<h3>Error : $identName not provided</h3>";
                 $curStatus = "identityNotProvided"; // The identity was not given
@@ -291,7 +294,7 @@ class LoginSystem {
                         <a href='{$this->curPageURL()}?resetPassToken={$token}'>Reset Password : {$token}</a>
                     </blockquote>";
                     $this->sendMail($email, $subject, $body);    /* Change mail() function to something else if you like */
-                    echo "<p>An email has been sent to your email inbox with instructions. Check Your Mail Inbox and SPAM Folders.</p><p>You can close this window.</p>";
+                    echo "<p>An email has been sent to your email inbox with instructions. Check Your Mail Inbox and SPAM Folders.</p>";
                     $curStatus = "emailSent"; // E-Mail has been sent
                 }
             }
@@ -303,13 +306,13 @@ class LoginSystem {
     public function changePassword($parent = ""){
         $curStatus = "initial";    // The Current Status of Change Password action
         if($this->loggedIn){
-            if( $parent == $this->secureKey && isset($_POST['newPassword']) && $_POST['newPassword'] != "" ){
+            if( $parent == $this->secureKey && isset(HTTP::$POST['newPassword']) && HTTP::$POST['newPassword'] != "" ){
                 $randomSalt    = $this->rand_string(20);
-                $saltedPass = hash('sha256',$_POST['newPassword'].$this->passwordSalt.$randomSalt);
+                $saltedPass = hash('sha256',HTTP::$POST['newPassword'].$this->passwordSalt.$randomSalt);
                 $sql            = $this->dbh->prepare("UPDATE `{$this->dbtable}` SET `password` = ?, `password_salt` = ? WHERE `user_id` = ?");
                 $sql->execute(array($saltedPass, $randomSalt, $this->user));
                 return true;
-            }elseif( !isset($_POST['logSysChangePassword']) ){
+            }elseif( !isset(HTTP::$POST['logSysChangePassword']) ){
                 $html = "<form action='".$_SERVER['PHP_SELF']."' method='POST'>";
                     $html .= "<label>Current Password<br/><input type='password' name='curpass'/></label><br/>";
                     $html .= "<label>New Password<br/><input type='password' name='newPassword'/></label><br/>";
@@ -318,11 +321,11 @@ class LoginSystem {
                 $html .= "</form>";
                 echo $html;
                 $curStatus = "changePasswordForm"; // The form for changing password is shown now
-            }elseif(isset($_POST['logSysChangePassword'])){
-                if( isset($_POST['newPassword']) && $_POST['newPassword']!="" && isset($_POST['newPassword2']) && $_POST['newPassword2']!="" && isset($_POST['curpass']) && $_POST['curpass']!="" ){
-                    $curpass          = $_POST['curpass'];
-                    $newPassword  = $_POST['newPassword'];
-                    $newPassword2 = $_POST['newPassword2'];
+            }elseif(isset(HTTP::$POST['logSysChangePassword'])){
+                if( isset(HTTP::$POST['newPassword']) && HTTP::$POST['newPassword']!="" && isset(HTTP::$POST['newPassword2']) && HTTP::$POST['newPassword2']!="" && isset(HTTP::$POST['curpass']) && HTTP::$POST['curpass']!="" ){
+                    $curpass          = HTTP::$POST['curpass'];
+                    $newPassword  = HTTP::$POST['newPassword'];
+                    $newPassword2 = HTTP::$POST['newPassword2'];
                     $sql              = $this->dbh->prepare("SELECT user_name FROM `{$this->dbtable}` WHERE user_id=?");
                     $sql->execute(array($this->user));
                     $curuserUsername = $sql->fetchColumn();

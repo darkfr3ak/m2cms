@@ -54,7 +54,7 @@
         $main = new Menu;
 
         $main->add('<span class="glyphicon glyphicon-home"></span>', 'index.php');
-        //$about = $main->add('about', 'about');
+        $about = $main->add('about', 'about.php');
         //$about->add('Who we are?', 'who-we-are?');
         //$about->add('What we do?', 'what-we-do?');
         //$main->add('Services', 'services');
@@ -62,7 +62,7 @@
         // menu #2
         $user = new Menu;
         $profile = $user->add('Profile', '');
-        $profile->add('Account', 'home.php')->link->prepend('<span class="glyphicon glyphicon-user"></span> ');
+        $profile->add('Account', 'profile.php')->link->prepend('<span class="glyphicon glyphicon-user"></span> ');
 
         $profile->add('Settings', 'settings')->link->prepend('<span class="glyphicon glyphicon-cog"></span> ');
         $user->add('Logout', 'logout.php');
@@ -110,14 +110,21 @@
       <ul class="nav navbar-nav navbar-right">
         <?php 
         if($LS->loggedIn){
-            echo bootstrapItems($user); 
+            echo bootstrapItems($user);
+            ?>
+            <p class="navbar-text navbar-right">Signed in as <a href="profile.php" class="navbar-link"><?php echo $LS->getUser("user_name"); ?></a></p>
+        <?php
         }else{
-
+            ?>
+            <p class="navbar-text navbar-right"><a href="login.php" class="navbar-link">Einloggen / Anmelden</a></p>
+        <?php
         }
         ?>
-          <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link"><?php echo $LS->getUser("user_name"); ?></a></p>
+          
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container -->
 </nav>
         <div class="container">
+            
+            
