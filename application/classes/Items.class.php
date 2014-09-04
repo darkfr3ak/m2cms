@@ -1,4 +1,5 @@
 <?php
+
 /*
  * Copyright (C) 2014 darkfr3ak <info at darkfr3ak.de>
  *
@@ -17,19 +18,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-include 'themes/default/header.inc.php';
-?>
-<h4>Über!</h4>
-<?php
-$query = $DBO->query("SELECT vnum, locale_name FROM item_proto");
-?>
-<textarea name="user_eingabe" cols="50" rows="10">
-    <?php
-    foreach ($query as $key => $value) {
-        echo "'" . $value['vnum'] . "'=>'" . $value['locale_name'] . "',\n";
+/**
+ * Description of Items
+ *
+ * @author darkfr3ak <info at darkfr3ak.de>
+ */
+class Items {
+
+    //put your code here
+    public function __construct() {
+        
     }
-    ?>
-</textarea>
-<?php
-include 'themes/default/footer.inc.php';
-?>
+
+}

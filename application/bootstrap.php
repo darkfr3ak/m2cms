@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2014 darkfr3ak <info at darkfr3ak.de>
  *
  * This program is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@ ini_set('session.use_trans_sid', false);
 ini_set('session.use_only_cookies', true);
 ini_set('url_rewriter.tags', '');
 ini_set("display_errors", "on");
-header("Content-type:text/html; charset=utf-8"); 
+header("Content-type:text/html; charset=utf-8");
 error_reporting(E_ALL ^ E_NOTICE);
 
 define("DS", DIRECTORY_SEPARATOR);
@@ -36,7 +36,7 @@ if (version_compare(PHP_VERSION, '5.3.7', '<')) {
 } else if (version_compare(PHP_VERSION, '5.5.0', '<')) {
     // if you are using PHP 5.3 or PHP 5.4 you have to include the password_api_compatibility_library.php
     // (this library adds the PHP 5.5 password hashing functions to older versions of PHP)
-    require_once(SITE_ROOT."application/libraries/PasswordCompatibility.lib.php");
+    require_once(SITE_ROOT . "application/libraries/PasswordCompatibility.lib.php");
 }
 
 /**
@@ -46,43 +46,57 @@ if (version_compare(PHP_VERSION, '5.3.7', '<')) {
  * @link http://www.sparky-san.com
  * 
  */
-
 function application_autoloader($class) {
-    $class_filename = $class.'.class.php';
-    $lib_filename = $class.'.lib.php';
+    $class_filename = $class . '.class.php';
+    $lib_filename = $class . '.lib.php';
     $class_root = dirname(__FILE__);
     $cache_file = "{$class_root}/cache/classpaths.cache";
     $cache_folder = "{$class_root}/cache/";
     $path_cache = (file_exists($cache_file)) ? unserialize(file_get_contents($cache_file)) : array();
-    
-    if (!file_exists($cache_folder)) { mkdir($cache_folder); }
-    
-    if (!is_array($path_cache)) { $path_cache = array(); }
-    
+
+    if (!file_exists($cache_folder)) {
+        mkdir($cache_folder);
+    }
+
+    if (!is_array($path_cache)) {
+        $path_cache = array();
+    }
+
     if (array_key_exists($class, $path_cache)) {
         /* Load class using path from cache file (if the file still exists) */
-        if (file_exists($path_cache[$class])) { require_once $path_cache[$class]; }
-
+        if (file_exists($path_cache[$class])) {
+            require_once $path_cache[$class];
+        }
     } else {
         /* Determine the location of the file within the $class_root and, if found, load and cache it */
         $directories = new RecursiveDirectoryIterator($class_root);
-        foreach(new RecursiveIteratorIterator($directories) as $file) {
+        foreach (new RecursiveIteratorIterator($directories) as $file) {
             if ($file->getFilename() == $class_filename || $file->getFilename() == $lib_filename) {
                 $full_path = $file->getRealPath();
-                $path_cache[$class] = $full_path;                        
-                require_once $full_path; 
+                $path_cache[$class] = $full_path;
+                require_once $full_path;
                 break;
             }
         }
     }
 
     $serialized_paths = serialize($path_cache);
-    if ($serialized_paths != $path_cache) { file_put_contents($cache_file, serialize($path_cache)); }
+    if ($serialized_paths != $path_cache) {
+        file_put_contents($cache_file, serialize($path_cache));
+    }
 }
 
 spl_autoload_register('application_autoloader');
 
 HTTP::init();
-
 $LS = new LoginSystem();
 $LS->site_root = SITE_ROOT;
+
+$pdoConfig = new stdClass();
+$pdoConfig->_database = isset($dbname) ? $dbname : 'player';
+$pdoConfig->_server = isset($servername) ? $servername : 'localhost';
+$pdoConfig->_user = isset($dbusername) ? $dbusername : 'root';
+$pdoConfig->_password = isset($dbpassword) ? $dbpassword : 'root';
+$pdoConfig->_engine = 'mysql';
+$pdoConfig->_showErrors = true;
+$DBO = new Database($pdoConfig);
