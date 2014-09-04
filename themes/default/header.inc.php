@@ -64,7 +64,7 @@
         $profile = $user->add('Profile', '');
         $profile->add('Account', 'profile.php')->link->prepend('<span class="glyphicon glyphicon-user"></span> ');
 
-        $profile->add('Settings', 'settings')->link->prepend('<span class="glyphicon glyphicon-cog"></span> ');
+        $profile->add('Settings', 'account.php')->link->prepend('<span class="glyphicon glyphicon-cog"></span> ');
         $user->add('Logout', 'logout.php');
         
         function bootstrapItems($items) {
